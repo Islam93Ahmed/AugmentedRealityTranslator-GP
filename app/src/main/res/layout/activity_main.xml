@@ -25,21 +25,27 @@
         android:onClick="onClick"
         android:minHeight="80dp"
         android:minWidth="200dp"
-        android:layout_above="@+id/button"
-        android:layout_alignRight="@+id/ReturnedPic"
-        android:layout_alignEnd="@+id/ReturnedPic"
-        android:layout_alignLeft="@+id/ReturnedPic"
-        android:layout_alignStart="@+id/ReturnedPic" />
+        android:layout_above="@+id/trans"
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Set Wallpaper"
-        android:id="@+id/button"
+        android:text="translation"
+        android:id="@+id/trans"
         android:onClick="onClick"
-        android:minWidth="200dp"
-        android:layout_marginBottom="62dp"
-        android:minHeight="80dp"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="49dp"
+        android:minHeight="80dp"
+        android:minWidth="200dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/translated"
+        android:layout_alignBottom="@+id/trans"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
 </RelativeLayout>
