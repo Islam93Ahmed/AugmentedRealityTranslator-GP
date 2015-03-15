@@ -4,67 +4,131 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.v4.graphics.BitmapCompat;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class BoundingBox {
 
-    public static int words_num;
-    public static int char_num;
-    public static Bitmap[] orig_words;
-    public static Bitmap[] getWords(Bitmap img, Bitmap source, Bitmap source_2, boolean flag)
+    private static Bitmap[] orig_lines;
+    private static int num_components;
+    public static Bitmap[] getWords(Bitmap img, Bitmap source, int line_num)
     {
-        int width = img.getWidth();
-        int height = img.getHeight();
-        System.out.println(width + " " + height);
-        int[] oneRowImage = new int[height * width];
-        int index = 0;
-        for(int i = 0; i < height; i++)
+        Map<Integer, BoundingBoxVertices> bounding_box = createBoundingBox(img);
+        /*System.out.println("Before sorting");
+        for (int i = 1; i < num_components; i++)
         {
-            for(int j = 0; j < width; j++)
-            {
-                int color = img.getPixel(j, i);
-                oneRowImage[index] = Color.red(color);
-                index++;
-            }
-        }
-        ConnectComponent cc = new ConnectComponent();
-        int[] labeledImage = cc.compactLabeling(oneRowImage, height, width, true);
-        index = 0;
+            int x1 = bounding_box.get(i).x1;
+            int y1 = bounding_box.get(i).y1;
+            int x2 = bounding_box.get(i).x2;
+            int y2 = bounding_box.get(i).y2;
+            System.out.println("(" + x1 + ", " + y1 + ") & ("+ x2 + ", " + y2 + ") ");
+        }*/
+        //sort(bounding_box);
+        /*System.out.println("After sorting");
+        for (int i = 1; i < num_components; i++)
+        {
+            int x1 = bounding_box.get(i).x1;
+            int y1 = bounding_box.get(i).y1;
+            int x2 = bounding_box.get(i).x2;
+            int y2 = bounding_box.get(i).y2;
+            System.out.println("(" + x1 + ", " + y1 + ") & ("+ x2 + ", " + y2 + ") ");
+        }*/
 
-        Map<Integer, BoundingBoxVertices> bounding_box = new HashMap<Integer, BoundingBoxVertices>();
-        int[][] buffer_label_image = new int[height][width];
-        for(int i = 0; i < height; i++)
+        Set<Integer> keys = bounding_box.keySet();
+        Bitmap[] orig_words = new Bitmap[keys.size() + 1];
+
+        for(int key : keys)
         {
-            for(int j = 0; j < width; j++)
-            {
-                buffer_label_image[i][j] = labeledImage[index];
-                int label = buffer_label_image[i][j];
-                if(label > 0)
+            int x1, y1, x2, y2;
+            x1 = bounding_box.get(key).x1;
+            y1 = bounding_box.get(key).y1;
+            x2 = bounding_box.get(key).x2;
+            y2 = bounding_box.get(key).y2;
+
+            if(x1 - 2 > 0)
+                x1 -= 2;
+            if(y1 - 2 > 0)
+                y1 -= 2;
+            if(x2 + 2 < img.getHeight())
+                x2 += 2;
+            if(y2 + 2 < img.getWidth())
+                y2 += 2;
+
+            int w = y2 - y1;
+            int h = x2 - x1;
+
+            orig_words[key] = Bitmap.createBitmap(w + 10 , h + 10, Bitmap.Config.ARGB_8888);
+            for(int i = 0; i < (x2-x1) + 10; i++)
+                for(int j = 0; j < (y2-y1) + 10; j++)
                 {
-                    if(bounding_box.get(label) == null)
-                        bounding_box.put(label, new BoundingBoxVertices(i, j));
-                    else
-                    {
-                        if(i < bounding_box.get(label).x1)
-                            bounding_box.get(label).x1 = i;
-                        else if(i > bounding_box.get(label).x2)
-                            bounding_box.get(label).x2 = i;
-                        if( j < bounding_box.get(label).y1)
-                            bounding_box.get(label).y1 = j;
-                        else if(j > bounding_box.get(label).y2)
-                            bounding_box.get(label).y2 = j;
-                    }
+                    orig_words[key].setPixel(j, i, Color.WHITE);
                 }
-                index++;
+            for(int x = x1, i = 5; x < x2; x++, i++)
+            {
+                for(int y = y1, j = 5; y < y2; y++, j++)
+                {
+                    int color = orig_lines[line_num].getPixel(y, x);
+                    orig_words[key].setPixel(j, i, Color.rgb(Color.red(color), Color.green(color), Color.blue(color)));
+                }
             }
         }
+        return orig_words;
+    }
+
+    public static List<Bitmap> getCharacters(Bitmap img)
+    {
+        Map<Integer, BoundingBoxVertices> bounding_box = createBoundingBox(img);
         Set<Integer> keys = bounding_box.keySet();
-        words_num = keys.size();
-        Bitmap[] words = new Bitmap[cc.next_label + 1];
-        if(flag)
-            orig_words = new Bitmap[cc.next_label + 1];
+
+        List<Bitmap> characters = new ArrayList<Bitmap>();
+
+        for(int key : keys)
+        {
+            int x1, y1, x2, y2;
+            x1 = bounding_box.get(key).x1;
+            y1 = bounding_box.get(key).y1;
+            x2 = bounding_box.get(key).x2;
+            y2 = bounding_box.get(key).y2;
+
+            if(x1 - 1 > 0)
+                x1 -= 1;
+            if(y1 - 1 > 0)
+                y1 -= 1;
+            if(x2 + 1 < img.getHeight())
+                x2 += 1;
+            if(y2 + 1 < img.getWidth())
+                y2 += 1;
+
+            if(x2 - x1 < 0 || y2 - y1 < 0)
+                continue;
+
+
+            Bitmap character = Bitmap.createBitmap((y2-y1) + 10 , (x2-x1) + 10, Bitmap.Config.ARGB_8888);
+
+            for(int x = x1, i = 5; x < x2; x++, i++)
+            {
+                for(int y = y1, j = 5; y < y2; y++, j++)
+                {
+                    int color = img.getPixel(y, x);
+                    character.setPixel(j, i, Color.rgb(Color.red(color), Color.red(color), Color.red(color)));
+                }
+            }
+            characters.add(character);
+        }
+        return characters;
+    }
+
+    public static Bitmap[] getLines(Bitmap img, Bitmap source, Bitmap source_2)
+    {
+        Map<Integer, BoundingBoxVertices> bounding_box = createBoundingBox(img);
+        Set<Integer> keys = bounding_box.keySet();
+
+        Bitmap[] lines = new Bitmap[keys.size() + 1];
+        orig_lines = new Bitmap[keys.size() + 1];
+
         for(int key : keys)
         {
             int x1 = bounding_box.get(key).x1,
@@ -72,40 +136,50 @@ public class BoundingBox {
                     x2 = bounding_box.get(key).x2,
                     y2 = bounding_box.get(key).y2;
 
-            source.setPixel(y1, x1, Color.GREEN);
-            source.setPixel(y2, x2, Color.GREEN);
+            if(x1 - 2 > 0)
+                x1 -= 2;
+            if(y1 - 2 > 0)
+                y1 -= 2;
+            if(x2 + 2 < img.getHeight())
+                x2 += 2;
+            if(y2 + 2 < img.getWidth())
+                y2 += 2;
 
-            int w = y2 - y1;
-            int h = x2 - x1;
-
-            words[key] = Bitmap.createBitmap(w + 10, h + 10, Bitmap.Config.ARGB_8888);
-            if(flag)
+            int line_width = y2 - y1;
+            int line_height = x2 - x1;
+            if(line_width < 0 || line_height < 0)
             {
-                orig_words[key] = Bitmap.createBitmap((y2-y1) + 10 , (x2-x1) + 10, Bitmap.Config.ARGB_8888);
-                for(int i = 0; i < (x2-x1) + 10; i++)
-                    for(int j = 0; j < (y2-y1) + 10; j++)
-                    {
-                        orig_words[key].setPixel(j, i, Color.WHITE);
-                    }
+                continue;
             }
+            int image_size = (img.getWidth() - 2) * (img.getHeight() - 2);
+            int line_size = line_height * line_width;
+            if(line_size > image_size)
+            {
+                continue;
+            }
+
+            lines[key] = Bitmap.createBitmap((y2-y1) + 10 , (x2-x1) + 10, Bitmap.Config.ARGB_8888);
+            orig_lines[key] = Bitmap.createBitmap((y2-y1) + 10 , (x2-x1) + 10, Bitmap.Config.ARGB_8888);
+            for(int i = 0; i < (x2-x1) + 10; i++)
+                for(int j = 0; j < (y2-y1) + 10; j++)
+                {
+                    orig_lines[key].setPixel(j, i, Color.WHITE);
+                }
             for(int x = x1, i = 5; x < x2; x++, i++)
             {
                 for(int y = y1, j = 5; y < y2; y++, j++)
                 {
                     int color = source.getPixel(y, x);
-                    words[key].setPixel(j, i, Color.rgb(Color.red(color), Color.red(color), Color.red(color)));
-                    if(flag)
-                    {
-                        color = source_2.getPixel(y, x);
-                        orig_words[key].setPixel(j, i, Color.rgb(Color.red(color), Color.green(color), Color.blue(color)));
-                    }
+                    lines[key].setPixel(j, i, Color.rgb(Color.red(color), Color.green(color), Color.blue(color)));
+                    color = source_2.getPixel(y, x);
+                    orig_lines[key].setPixel(j, i, Color.rgb(Color.red(color), Color.green(color), Color.blue(color)));
                 }
             }
         }
-        return words;
+        return lines;
     }
 
-    public static Bitmap[] getCharacters(Bitmap img, Bitmap source)
+    private static Map<Integer, BoundingBoxVertices> createBoundingBox(Bitmap img)
     {
         int width = img.getWidth();
         int height = img.getHeight();
@@ -123,7 +197,7 @@ public class BoundingBox {
         ConnectComponent cc = new ConnectComponent();
         int[] labeledImage = cc.compactLabeling(oneRowImage, height, width, true);
         index = 0;
-
+        num_components = cc.next_label+1;
         Map<Integer, BoundingBoxVertices> bounding_box = new HashMap<Integer, BoundingBoxVertices>();
         int[][] buffer_label_image = new int[height][width];
         for(int i = 0; i < height; i++)
@@ -151,32 +225,55 @@ public class BoundingBox {
                 index++;
             }
         }
-        Set<Integer> keys = bounding_box.keySet();
-        char_num = keys.size();
-        Bitmap[] words = new Bitmap[cc.next_label + 1];
+        return bounding_box;
+    }
 
-        for(int key : keys)
+
+    private static void sort(Map<Integer, BoundingBoxVertices> bb)
+    {
+        System.out.println("Before sorting");
+        for (int i = 1; i < num_components; i++)
         {
-            int x1 = bounding_box.get(key).x1 - 2,
-                    y1 = bounding_box.get(key).y1 - 2,
-                    x2 = bounding_box.get(key).x2 + 2,
-                    y2 = bounding_box.get(key).y2 + 2;
+            int x1 = bb.get(i).x1;
+            int y1 = bb.get(i).y1;
+            int x2 = bb.get(i).x2;
+            int y2 = bb.get(i).y2;
+            System.out.println("(" + x1 + ", " + y1 + ") & ("+ x2 + ", " + y2 + ") ");
+        }
 
-            words[key] = Bitmap.createBitmap((y2-y1) + 10 , (x2-x1) + 10, Bitmap.Config.ARGB_8888);
-            for(int i = 0; i < (x2-x1) + 10; i++)
-                for(int j = 0; j < (y2-y1) + 10; j++)
-                {
-                    words[key].setPixel(j, i, Color.WHITE);
-                }
-            for(int x = x1, i = 5; x < x2; x++, i++)
+        for(int c = 1; c <(num_components-1); c++)
+        {
+            for (int d = 1; d < (num_components-c-1); d++)
             {
-                for(int y = y1, j = 5; y < y2; y++, j++)
+                if(bb.get(d).y1 > bb.get(d+1).y1)
                 {
-                    int color = source.getPixel(y, x);
-                    words[key].setPixel(j, i, Color.rgb(Color.red(color), Color.red(color), Color.red(color)));
+                    BoundingBoxVertices tmp = new BoundingBoxVertices(0,0);
+                    tmp.x1 = bb.get(d).x1;
+                    tmp.y1 = bb.get(d).y1;
+                    tmp.x2 = bb.get(d).x2;
+                    tmp.y2 = bb.get(d).y2;
+                    bb.get(d).x1 = bb.get(d+1).x1;
+                    bb.get(d).y1 = bb.get(d+1).y1;
+                    bb.get(d).x2 = bb.get(d+1).x2;
+                    bb.get(d).y2 = bb.get(d+1).y2;
+                    bb.get(d+1).x1 = tmp.x1;
+                    bb.get(d+1).y1 = tmp.y1;
+                    bb.get(d+1).x2 = tmp.x2;
+                    bb.get(d+1).y2 = tmp.y2;
                 }
             }
         }
-        return words;
+
+
+        System.out.println("After sorting");
+        for (int i = 1; i < num_components; i++)
+        {
+            int x1 = bb.get(i).x1;
+            int y1 = bb.get(i).y1;
+            int x2 = bb.get(i).x2;
+            int y2 = bb.get(i).y2;
+            System.out.println("(" + x1 + ", " + y1 + ") & ("+ x2 + ", " + y2 + ") ");
+        }
     }
+
 }

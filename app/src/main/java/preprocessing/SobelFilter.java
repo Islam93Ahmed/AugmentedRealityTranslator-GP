@@ -29,7 +29,46 @@ public class SobelFilter {
 		
 		return edgeImage;
 	}
-	
+
+    public int[][] detectEdges_2(int[][] origImage, int height, int width)
+    {
+        int[][] padedImage = padByZero(origImage, height, width);
+        int[][] edgeImage = new int[height][width];
+        int x = 0, y = 0;
+        for(int i = 1; i < height+1; i++)
+        {
+            for(int j = 1; j < width+1; j++)
+            {
+                int y_sum = 0, x_sum = 0;
+                x_sum += padedImage[i-1][j-1] * hor_kernel[0][0];
+                x_sum += padedImage[i-1][j]   * hor_kernel[0][1];
+                x_sum += padedImage[i-1][j+1] * hor_kernel[0][2];
+                x_sum += padedImage[i][j-1]   * hor_kernel[1][0];
+                x_sum += padedImage[i][j]     * hor_kernel[1][1];
+                x_sum += padedImage[i][j+1]   * hor_kernel[1][2];
+                x_sum += padedImage[i+1][j-1] * hor_kernel[2][0];
+                x_sum += padedImage[i+1][j]   * hor_kernel[2][1];
+                x_sum += padedImage[i+1][j+1] * hor_kernel[2][2];
+                /////////////////////////////////////////////////
+                y_sum += padedImage[i-1][j-1] * ver_kernel[0][0];
+                y_sum += padedImage[i-1][j]   * ver_kernel[0][1];
+                y_sum += padedImage[i-1][j+1] * ver_kernel[0][2];
+                y_sum += padedImage[i][j-1]   * ver_kernel[1][0];
+                y_sum += padedImage[i][j]     * ver_kernel[1][1];
+                y_sum += padedImage[i][j+1]   * ver_kernel[1][2];
+                y_sum += padedImage[i+1][j-1] * ver_kernel[2][0];
+                y_sum += padedImage[i+1][j]   * ver_kernel[2][1];
+                y_sum += padedImage[i+1][j+1] * ver_kernel[2][2];
+
+                edgeImage[x][y] = ((int)Math.ceil(Math.sqrt((y_sum * y_sum) + (x_sum * x_sum))) > 128) ? 255 : 0;
+                y++;
+            }
+            x++;
+            y = 0;
+        }
+        return edgeImage;
+    }
+
 	private int[][] padByZero(int[][] origImage, int height, int width)
 	{
 		int[][] padedImage = new int[height+2][width+2];
@@ -65,9 +104,9 @@ public class SobelFilter {
 			for(int j = 1; j < width+1; j++)
 			{
 				int sum = 0;
-				sum += origImage[i-1][j-1] * hor_kernel[0][0];
 				sum += origImage[i-1][j]   * hor_kernel[0][1];
-				sum += origImage[i-1][j+1] * hor_kernel[0][2];
+                sum += origImage[i-1][j-1] * hor_kernel[0][0];
+                sum += origImage[i-1][j+1] * hor_kernel[0][2];
 				sum += origImage[i][j-1]   * hor_kernel[1][0];
 				sum += origImage[i][j]     * hor_kernel[1][1];
 				sum += origImage[i][j+1]   * hor_kernel[1][2];
