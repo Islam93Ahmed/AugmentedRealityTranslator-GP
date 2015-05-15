@@ -1,4 +1,4 @@
-package preprocessing;
+package segmentation;
 
 import java.util.Vector;
 

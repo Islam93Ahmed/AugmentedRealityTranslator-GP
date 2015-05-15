@@ -1,32 +1,33 @@
-package preprocessing;
+package image;
 
 import android.graphics.Bitmap;
 import android.graphics.Color;
 
-public class Thresholder {
-	public int[][] threshold(int[][] image, int height, int width)
-	{
-		int[][] new_image = new int[height][width];
-        Bitmap bm = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        for (int i = 0; i < height; i++)
-        {
-            for (int j = 0; j < width; j++)
-            {
-                bm.setPixel(j, i, Color.rgb(image[i][j], image[i][j], image[i][j]));
-            }
-        }
-        Bitmap bin_image = GrayscaleToBin(bm);
-        for (int x = 0; x < bin_image.getHeight(); x++)
-        {
-            for (int y = 0; y < bin_image.getWidth(); y++)
-            {
-                int color = bin_image.getPixel(y, x);
-                new_image[x][y] =  Color.red(color);
-            }
-        }
-		return new_image;
-	}
+/**
+ * Created by Islam on 4/20/2015.
+ */
+public class Converter {
 
+    public static Bitmap rgbToGray(Bitmap image)
+    {
+        int height = image.getHeight();
+        int width = image.getWidth();
+        Bitmap gray = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        for (int x = 0; x < height; x++)
+        {
+            for (int y = 0; y < width; y++)
+            {
+                int rgb = image.getPixel(y, x);
+                Color color = new Color();
+                int red = color.red(rgb);
+                int green = color.green(rgb);
+                int blue = color.blue(rgb);
+                int gray_color = (int)(0.59f * (float)red + 0.30f * (float)green +  0.11f * (float)blue);
+                gray.setPixel(y, x, Color.rgb(gray_color, gray_color, gray_color));
+            }
+        }
+        return gray;
+    }
 
     public static Bitmap GrayscaleToBin(Bitmap bm2) {
         Bitmap bm;

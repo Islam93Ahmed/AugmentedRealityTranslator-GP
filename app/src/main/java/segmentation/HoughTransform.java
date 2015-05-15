@@ -1,5 +1,8 @@
-package preprocessing;
+package segmentation;
 
+
+import android.graphics.Bitmap;
+import android.graphics.Color;
 
 public class HoughTransform {
 	
@@ -10,17 +13,15 @@ public class HoughTransform {
 	private int height;
 	private int width;
 	private int maxRho;
-	private int[][] image;
-	
-	public HoughTransform(int startTheta, int endTheta, int[][] image, int height, int width)
+	//private int[][] image;
+	private Bitmap image;
+	public HoughTransform(int startTheta, int endTheta, /*int[][] image*/ Bitmap image, int height, int width)
 	{
 		this.startTheta = startTheta;
 		this.endTheta = endTheta;
 		this.height = height;
 		this.width = width;
 		maxRho = (int) Math.sqrt((height * height) + (width * width));
-		//int lenOfTheta = endTheta - startTheta;
-		//System.out.println(lenOfTheta + " " + maxRho);
 		positiveHoughSpace = new AccCell[180][maxRho];
 		negativeHoughSpace = new AccCell[180][maxRho];
 		this.image = image;
@@ -33,7 +34,7 @@ public class HoughTransform {
 		{
 			for (int y = 0; y < width; y++)
 			{
-				if(image[x][y] != 255)
+				if(Color.red(image.getPixel(y,x)) == 0)
 					continue;
 				for (int Theta = 94; Theta <= endTheta; Theta++)
 				{
@@ -66,11 +67,10 @@ public class HoughTransform {
 		}
 	}
 	
-	public int[][] getHoughImage(int pixelsCount, int connectDistance)
+	public /*int[][]*/ Bitmap getHoughImage(int pixelsCount, int connectDistance)
 	{
-		//BufferedImage newImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
-		//BufferedImage newImage = image;
-		int[][] hough_image = new int[height][width];
+		/*int[][] hough_image = new int[height][width];*/
+        Bitmap hough_image = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
 		for (int t = startTheta; t <= endTheta; t++)
         {
     		for (int r = 0; r < maxRho; r++)
@@ -88,17 +88,14 @@ public class HoughTransform {
 							 
 							 if(d < connectDistance)
 							 {
-								 //System.out.println(d);
-								 //System.out.println(x0 + " " + x1);
 								 if(x0 == x1)
 									 horGapBridging(hough_image, x0, y0, x1, y1);
 								 gapBridging(hough_image, x0, y0, x1, y1);
-								 //if(d > 30)
-									 //img.showImage(newImage, "New Image");
 							 }
 						 }
 						 else
-							 hough_image[x0][y0] = 255;
+                             hough_image.setPixel(y0, x0, Color.rgb(255, 255, 255));
+
 					 }
 				 }// End of If
 				
@@ -119,7 +116,7 @@ public class HoughTransform {
 								 gapBridging(hough_image, x0, y0, x1, y1);
 						 }
 						 else
-							 hough_image[x0][y0] = 255;
+                             hough_image.setPixel(y0, x0, Color.rgb(255, 255, 255));
 					 }
 				 }// End of If
 			} 	
@@ -127,13 +124,13 @@ public class HoughTransform {
         return hough_image;
 	}
 	
-	private void gapBridging(int[][] image, int x0, int y0, int x1, int y1)
+	private void gapBridging(/*int[][]*/Bitmap image, int x0, int y0, int x1, int y1)
 	{
 		 int dx = x1 - x0;
 		 int dy = y1 - y0;
 		 
 		 int D = (2 * dy) - dx; 
-		 image[x0][y0] = 255;
+		 image.setPixel(y0, x0, Color.rgb(255,255,255));
 		 int y = y0;
 		 for(int x = x0 + 1; x <= x1; x++)
 		 {
@@ -141,29 +138,24 @@ public class HoughTransform {
 			 if(D > 0)
 			 {
 				 y++;
-				 image[x][y] = 255;
+                 image.setPixel(y, x, Color.rgb(255,255,255));
 				 D = D + (2*dy-2*dx);
 			 }
 			 else
 			 {
-				 image[x][y] = 255;
+                 image.setPixel(y, x, Color.rgb(255,255,255));
 				 D = D + (2*dy);
 			 }
 		 }
 	}
 	
-	private void horGapBridging(int[][] image, int x0, int y0, int x1, int y1)
+	private void horGapBridging(/*int[][]*/Bitmap image, int x0, int y0, int x1, int y1)
 	{
-		 image[x0][y0] = 255;
+		 image.setPixel(y0, x0, Color.rgb(255, 255, 255));
 		
 		 for(int y = y0 + 1; y <= y1; y++)
 		 {
-			 
-			 image[x0][y] = 255;
-				
+             image.setPixel(y, x0, Color.rgb(255, 255, 255));
 		 }
 	}
-	
-	
-	
 }

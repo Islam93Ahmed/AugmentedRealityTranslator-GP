@@ -1,25 +1,24 @@
-package com.example.art.augmentedrealitytranslator_gp;
+package wordtranslation;
 
 /**
  * Created by kamal on 3/8/2015.
  */
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.View;
 import android.view.textservice.SentenceSuggestionsInfo;
 import android.view.textservice.SpellCheckerSession;
 import android.view.textservice.SuggestionsInfo;
 import android.view.textservice.TextInfo;
 import android.view.textservice.TextServicesManager;
 import android.widget.Button;
-import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.art.augmentedrealitytranslator_gp.R;
 import com.memetix.mst.language.Language;
 import com.memetix.mst.translate.Translate;
 public class translation  extends Activity implements SpellCheckerSession.SpellCheckerSessionListener {
@@ -56,6 +55,7 @@ public class translation  extends Activity implements SpellCheckerSession.SpellC
         Toast.makeText(getApplicationContext(), editText.getText().toString(),
                 Toast.LENGTH_SHORT).show();
 
+        //input string  
         String input = editText.getText().toString();
         String[] words = input.split(" ");
         for(int i=0;i<words.length;i++)
@@ -97,6 +97,7 @@ public class translation  extends Activity implements SpellCheckerSession.SpellC
             Translate.setClientId("KamalAbdelKader");
             Translate.setClientSecret("1F5EBm6jyQheV518t8vss2in3OGvkjIufqif/KEDMc8=");
             try {
+		//translated text here(after auto correction
                 translatedText = Translate.execute(corrected_Text, Language.ENGLISH, Language.ARABIC);
 
             } catch (Exception e) {

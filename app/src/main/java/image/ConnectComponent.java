@@ -1,4 +1,4 @@
-package preprocessing;
+package image;
 
 /**
  * Use row-by-row labeling algorithm to label connected components
@@ -13,7 +13,7 @@ package preprocessing;
 public class ConnectComponent
 {
     final int MAX_LABELS= 80000;
-    int next_label = 1;
+    public int next_label = 1;
 
     /**
      * label and re-arrange the labels to make the numbers of label continous

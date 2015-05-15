@@ -1,4 +1,4 @@
-package preprocessing;
+package segmentation;
 
 public class BoundingBoxVertices {
 	protected int x1;
